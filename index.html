@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Smart Student Placement Management System{% endblock %}
+{% block content %}
+<section class="hero" id="top">
+  <div class="container">
+    <div>
+      <h1>Smart Placement Management for a Better Career</h1>
+      <p>One portal where students see only the jobs they qualify for, apply in a click and follow every update, and placement officers run drives without spreadsheets.</p>
+      <div class="hero-actions">
+        <a class="btn btn-light" href="{{ url_for('register') }}">Get Started</a>
+        <a class="btn btn-ghost-light" href="{{ url_for('login') }}">Student Login</a>
+      </div>
+    </div>
+    <div class="check-card" aria-label="Example eligibility check">
+      <h3>Software Developer, ABC Technologies</h3>
+      <p class="muted small" style="margin-top:0">Eligibility check for a sample student</p>
+      <div class="check-row"><span>CGPA 8.2 (needs 7.0)</span><span class="tick">Met</span></div>
+      <div class="check-row"><span>Department CSE</span><span class="tick">Met</span></div>
+      <div class="check-row"><span>Backlogs 0 (max 0)</span><span class="tick">Met</span></div>
+      <div class="check-row"><span>Skill: Java, Python, SQL</span><span class="tick">Met</span></div>
+      <div class="check-row"><span>Graduation year 2026</span><span class="tick">Met</span></div>
+      <div class="elig-box ok" style="margin-top:.8rem"><strong>Congratulations! You are eligible to apply for this position.</strong></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="about"><div class="container">
+  <h2>About the portal</h2>
+  <p class="section-lead">Placement work usually runs on notice boards, forms and spreadsheets. This system moves it online: student profiles, company requirements, applications and results all live in one place, so nothing gets lost and no one applies for a role they cannot get.</p>
+  <ol class="steps">
+    <li><h3>Build your profile</h3><p>Add academics, skills and a PDF resume once.</p></li>
+    <li><h3>Find and apply</h3><p>Search jobs, see instantly whether you qualify, then apply.</p></li>
+    <li><h3>Track the outcome</h3><p>Follow status from Applied to Selected and get notified at each step.</p></li>
+  </ol>
+</div></section>
+
+<section class="section" id="features"><div class="container">
+  <h2>Features</h2>
+  <div class="grid-3" style="margin-top:1rem">
+    <div class="feature"><h3>Automatic eligibility</h3><p>CGPA, department, backlogs, skills, batch and percentages are checked against every job, with clear reasons when you fall short.</p></div>
+    <div class="feature"><h3>Search and filters</h3><p>Filter by company, role, location, salary, department, CGPA and job type without reloading the page.</p></div>
+    <div class="feature"><h3>Application tracking</h3><p>Colour-coded statuses show where each application stands, and duplicates are blocked.</p></div>
+    <div class="feature"><h3>Notifications</h3><p>New postings, shortlists, interview schedules and results arrive in your notification page.</p></div>
+    <div class="feature"><h3>Admin dashboard</h3><p>Manage students, companies, jobs and applications, and see placement charts at a glance.</p></div>
+    <div class="feature"><h3>Secure by design</h3><p>Hashed passwords, role-based access, CSRF protection and private resume storage.</p></div>
+  </div>
+</div></section>
+
+<section class="section" id="contact"><div class="container">
+  <h2>Contact the placement cell</h2>
+  <div class="card" style="max-width:560px">
+    <p style="margin:0">Email: <a href="mailto:placement@college.edu">placement@college.edu</a></p>
+    <p style="margin:.3rem 0 0">Phone: +91 44 0000 0000 (Mon to Fri, 9:30 am to 4:30 pm)</p>
+    <p style="margin:.3rem 0 0">Office: Training and Placement Cell, Administrative Block</p>
+  </div>
+</div></section>
+{% endblock %}

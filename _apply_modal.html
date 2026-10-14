@@ -1,0 +1,19 @@
+<div class="modal" id="applyModal" role="dialog" aria-modal="true" aria-labelledby="applyTitle">
+  <div class="modal-box">
+    <div class="modal-head"><h3 id="applyTitle">Apply for this job</h3><button class="icon-btn" type="button" data-close aria-label="Close">&times;</button></div>
+    <form method="post">
+      {{ csrf_input }}
+      <dl class="detail-list">
+        <dt>Student name</dt><dd>{{ st.name }}</dd>
+        <dt>Register number</dt><dd>{{ st.register_number }}</dd>
+        <dt>Email</dt><dd>{{ st.email }}</dd>
+        <dt>Selected company</dt><dd data-field="company"></dd>
+        <dt>Job role</dt><dd data-field="role"></dd>
+        <dt>Resume</dt><dd>{% if st.resume %}<a href="{{ url_for('resume', student_id=st.id) }}" target="_blank" rel="noopener">View attached resume (PDF)</a>
+          {% else %}<span class="cross">No resume uploaded.</span> <a href="{{ url_for('profile') }}">Upload one in your profile</a>{% endif %}</dd>
+      </dl>
+      <div class="form-actions"><button class="btn" type="submit" {{ 'disabled' if not st.resume }}>Submit Application</button>
+        <button class="btn btn-outline" type="button" data-close>Cancel</button></div>
+    </form>
+  </div>
+</div>

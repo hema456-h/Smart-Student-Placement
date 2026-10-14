@@ -1,0 +1,48 @@
+{% extends "layout.html" %}
+{% block page_title %}Welcome, {{ st.name.split()[0] }}{% endblock %}
+{% block content %}
+<div class="card" style="margin-bottom:1.2rem">
+  <div class="two-col" style="grid-template-columns:1.2fr 1fr;align-items:center">
+    <div>
+      <h2 style="font-size:1.4rem">{{ st.name }}</h2>
+      <p class="muted" style="margin:0">Register no. {{ st.register_number }} &middot; {{ st.department }} &middot; CGPA {{ '%.2f'|format(st.cgpa or 0) }}</p>
+    </div>
+    <div>
+      <div class="panel-title"><strong>Profile completion</strong><span>{{ completion }}%</span></div>
+      <div class="progress" role="progressbar" aria-valuenow="{{ completion }}" aria-valuemin="0" aria-valuemax="100"><span style="width:{{ completion }}%"></span></div>
+      {% if completion < 100 %}<p class="hint"><a href="{{ url_for('profile') }}">Finish your profile</a> to apply with confidence.</p>{% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="stat-grid">
+  <div class="stat"><div class="num">{{ stats.jobs }}</div><div class="lbl">Open jobs ({{ stats.eligible }} you qualify for)</div></div>
+  <div class="stat"><div class="num">{{ stats.applications }}</div><div class="lbl">Applications</div></div>
+  <div class="stat green"><div class="num">{{ stats.selected }}</div><div class="lbl">Selected companies</div></div>
+  <div class="stat amber"><div class="num">{{ stats.pending }}</div><div class="lbl">Pending applications</div></div>
+</div>
+
+<div class="quick-grid">
+  <a class="quick" href="{{ url_for('profile') }}"><h3>My Profile</h3><p>Academics, skills and resume</p></a>
+  <a class="quick" href="{{ url_for('jobs') }}"><h3>Find Jobs</h3><p>Search and check eligibility</p></a>
+  <a class="quick" href="{{ url_for('applications') }}"><h3>My Applications</h3><p>Track every status</p></a>
+  <a class="quick" href="{{ url_for('notifications') }}"><h3>Notifications</h3><p>{{ unread }} unread</p></a>
+</div>
+
+<div class="two-col">
+  <section>
+    <div class="panel-title"><h2>Recent applications</h2><a href="{{ url_for('applications') }}" class="small">View all</a></div>
+    {% if apps %}
+    <div class="table-wrap"><table>
+      <thead><tr><th>Company</th><th>Role</th><th>Status</th></tr></thead>
+      <tbody>{% for a in apps %}<tr><td>{{ a.company_name }}</td><td>{{ a.job_role }}</td><td><span class="badge {{ a.status|stclass }}">{{ a.status }}</span></td></tr>{% endfor %}</tbody>
+    </table></div>
+    {% else %}<div class="empty">No applications yet. <a href="{{ url_for('jobs') }}">Find a job to apply for.</a></div>{% endif %}
+  </section>
+  <section>
+    <div class="panel-title"><h2>Latest notifications</h2></div>
+    {% for n in notes %}<div class="note {{ 'unread' if not n.is_read }}"><h3>{{ n.title }}</h3><p class="small">{{ n.message }}</p></div>
+    {% else %}<div class="empty">Nothing new.</div>{% endfor %}
+  </section>
+</div>
+{% endblock %}

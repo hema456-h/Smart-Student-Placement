@@ -1,0 +1,55 @@
+{% extends "layout.html" %}
+{% block page_title %}Manage Students{% endblock %}
+{% block content %}
+<form class="card filters" method="get">
+  <div class="wide"><label for="q">Search by name, register number or email</label><input id="q" name="q" type="search" value="{{ search }}"></div>
+  <div><label for="dept">Department</label><select id="dept" name="dept"><option value="">All</option>{% for d in DEPARTMENTS %}<option {{ 'selected' if dept == d }}>{{ d }}</option>{% endfor %}</select></div>
+  <div style="display:flex;gap:.5rem"><button class="btn" type="submit">Search</button><a class="btn btn-outline" href="{{ url_for('admin_students') }}">Clear</a></div>
+</form>
+{% if students %}
+<div class="table-wrap"><table>
+  <thead><tr><th>Name</th><th>Register no.</th><th>Department</th><th>Batch</th><th>CGPA</th><th>Resume</th><th>Actions</th></tr></thead>
+  <tbody>{% for s in students %}
+  <tr><td>{{ s.name }}<div class="small muted">{{ s.email }}</div></td><td>{{ s.register_number }}</td><td>{{ s.department }}</td><td>{{ s.year }}</td><td>{{ '%.2f'|format(s.cgpa or 0) }}</td>
+    <td>{% if s.resume %}<a href="{{ url_for('resume', student_id=s.id) }}" target="_blank" rel="noopener">View</a>{% else %}<span class="muted">None</span>{% endif %}</td>
+    <td><div class="row-actions">
+      <button class="btn btn-outline btn-sm" type="button" data-modal="viewStudent" data-item='{{ s|tojson }}'>View</button>
+      <button class="btn btn-outline btn-sm" type="button" data-modal="editStudent" data-action="{{ url_for('admin_student_edit', sid=s.id) }}" data-item='{{ s|tojson }}'>Edit</button>
+      <form method="post" action="{{ url_for('admin_student_delete', sid=s.id) }}" data-confirm="Delete {{ s.name|e }}? Their applications and notifications will also be removed.">
+        {{ csrf_input }}<input type="hidden" name="next" value="{{ request.full_path }}"><button class="btn btn-danger btn-sm" type="submit">Delete</button></form>
+    </div></td></tr>{% endfor %}</tbody>
+</table></div>
+{% else %}<div class="empty">No students match your search.</div>{% endif %}
+{% endblock %}
+{% block modals %}
+<div class="modal" id="viewStudent" role="dialog" aria-modal="true"><div class="modal-box">
+  <div class="modal-head"><h3>Student profile</h3><button class="icon-btn" type="button" data-close aria-label="Close">&times;</button></div>
+  <dl class="detail-list">
+    <dt>Name</dt><dd data-field="name"></dd><dt>Register number</dt><dd data-field="register_number"></dd>
+    <dt>Email</dt><dd data-field="email"></dd><dt>Phone</dt><dd data-field="phone"></dd><dt>Address</dt><dd data-field="address"></dd>
+    <dt>Department</dt><dd data-field="department"></dd><dt>Graduation year</dt><dd data-field="year"></dd>
+    <dt>CGPA</dt><dd data-field="cgpa"></dd><dt>10th %</dt><dd data-field="tenth_percentage"></dd><dt>12th %</dt><dd data-field="twelfth_percentage"></dd>
+    <dt>Backlogs</dt><dd data-field="backlogs"></dd>
+    <dt>Programming</dt><dd data-field="prog_skills"></dd><dt>Web</dt><dd data-field="web_skills"></dd><dt>Database</dt><dd data-field="db_skills"></dd>
+    <dt>Other technical</dt><dd data-field="other_skills"></dd><dt>Soft skills</dt><dd data-field="soft_skills"></dd>
+  </dl>
+  <div class="form-actions"><a class="btn btn-outline" data-resume target="_blank" rel="noopener" hidden>View resume</a><button class="btn" type="button" data-close>Close</button></div>
+</div></div>
+<div class="modal" id="editStudent" role="dialog" aria-modal="true"><div class="modal-box">
+  <div class="modal-head"><h3>Edit student</h3><button class="icon-btn" type="button" data-close aria-label="Close">&times;</button></div>
+  <form method="post">{{ csrf_input }}<input type="hidden" name="next" value="{{ request.full_path }}">
+    <div class="form-grid">
+      <div><label>Name</label><input name="name" required></div><div><label>Register number</label><input name="register_number" required></div>
+      <div><label>Email</label><input name="email" type="email" required></div><div><label>Phone</label><input name="phone" pattern="[0-9]{10}" maxlength="10" required></div>
+      <div><label>Department</label><select name="department">{% for d in DEPARTMENTS %}<option>{{ d }}</option>{% endfor %}</select></div>
+      <div><label>Graduation year</label><input name="year" type="number" min="2000" max="2100" required></div>
+      <div><label>CGPA</label><input name="cgpa" type="number" step="0.01" min="0" max="10" required></div><div><label>Backlogs</label><input name="backlogs" type="number" min="0"></div>
+      <div><label>10th %</label><input name="tenth_percentage" type="number" step="0.01" min="0" max="100"></div><div><label>12th %</label><input name="twelfth_percentage" type="number" step="0.01" min="0" max="100"></div>
+      <div class="full"><label>Programming languages</label><input name="prog_skills"></div><div class="full"><label>Web technologies</label><input name="web_skills"></div>
+      <div class="full"><label>Database skills</label><input name="db_skills"></div><div class="full"><label>Other technical skills</label><input name="other_skills"></div>
+      <div class="full"><label>Soft skills</label><input name="soft_skills"></div>
+    </div>
+    <div class="form-actions"><button class="btn" type="submit">Save changes</button><button class="btn btn-outline" type="button" data-close>Cancel</button></div>
+  </form>
+</div></div>
+{% endblock %}

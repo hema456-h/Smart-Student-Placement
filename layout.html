@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block page_title %}{% endblock %} - Placement Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Source+Serif+4:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+{% set ep = request.endpoint %}
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <a class="brand" href="{{ url_for('dashboard' if session.role == 'student' else 'admin_dashboard') }}"><span class="logo-mark">SP</span> Smart Placement</a>
+    <nav aria-label="Dashboard">
+    {% if session.role == 'admin' %}
+      <a class="nav-link {{ 'active' if ep == 'admin_dashboard' }}" href="{{ url_for('admin_dashboard') }}">Dashboard</a>
+      <a class="nav-link {{ 'active' if ep == 'admin_students' }}" href="{{ url_for('admin_students') }}">Students</a>
+      <a class="nav-link {{ 'active' if ep == 'admin_companies' }}" href="{{ url_for('admin_companies') }}">Companies</a>
+      <a class="nav-link {{ 'active' if ep == 'admin_jobs' }}" href="{{ url_for('admin_jobs') }}">Jobs</a>
+      <a class="nav-link {{ 'active' if ep == 'admin_applications' }}" href="{{ url_for('admin_applications') }}">Applications</a>
+      <a class="nav-link {{ 'active' if ep == 'admin_notifications' }}" href="{{ url_for('admin_notifications') }}">Notifications</a>
+    {% else %}
+      <a class="nav-link {{ 'active' if ep == 'dashboard' }}" href="{{ url_for('dashboard') }}">Dashboard</a>
+      <a class="nav-link {{ 'active' if ep == 'profile' }}" href="{{ url_for('profile') }}">My Profile</a>
+      <a class="nav-link {{ 'active' if ep in ('jobs', 'job_details') }}" href="{{ url_for('jobs') }}">Find Jobs</a>
+      <a class="nav-link {{ 'active' if ep == 'applications' }}" href="{{ url_for('applications') }}">My Applications</a>
+      <a class="nav-link {{ 'active' if ep == 'notifications' }}" href="{{ url_for('notifications') }}">Notifications {% if unread %}<span class="pill">{{ unread }}</span>{% endif %}</a>
+    {% endif %}
+    </nav>
+    <form method="post" action="{{ url_for('logout') }}">{{ csrf_input }}<button class="nav-link" type="submit">Logout</button></form>
+  </aside>
+  <div class="main">
+    <header class="topbar">
+      <button class="menu-btn" id="menuBtn" type="button" aria-label="Toggle menu">Menu</button>
+      <h1>{{ self.page_title() }}</h1>
+      <span class="user-chip">{{ session.name }}</span>
+    </header>
+    {% include "_flash.html" %}
+    <main class="content">{% block content %}{% endblock %}</main>
+  </div>
+</div>
+{% block modals %}{% endblock %}
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

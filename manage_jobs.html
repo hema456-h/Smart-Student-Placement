@@ -1,0 +1,44 @@
+{% extends "layout.html" %}
+{% block page_title %}Manage Jobs{% endblock %}
+{% block content %}
+{% if companies %}
+<div class="form-actions" style="margin:0 0 1rem"><button class="btn" type="button" data-modal="jobModal" data-action="{{ url_for('admin_job_save') }}" data-title="Create job">Create Job</button></div>
+{% else %}<div class="flash warning" style="margin-bottom:1rem">Add a company first, then create jobs for it. <a href="{{ url_for('admin_companies') }}">Go to companies</a></div>{% endif %}
+{% if jobs %}
+<div class="table-wrap"><table>
+  <thead><tr><th>Company</th><th>Role</th><th>Package</th><th>Eligibility</th><th>Deadline</th><th>Status</th><th>Applicants</th><th>Actions</th></tr></thead>
+  <tbody>{% for j in jobs %}
+  <tr><td>{{ j.company_name }}</td><td>{{ j.job_role }}<div class="small muted">{{ j.job_type }}</div></td><td>{{ j.salary|lpa }}</td>
+    <td class="small">CGPA {{ '%g'|format(j.minimum_cgpa) }}+, {{ j.required_department }}<br>Backlogs up to {{ j.maximum_backlogs }}<br>{{ j.required_skills or 'No skills required' }}</td>
+    <td>{{ j.deadline|dmy }}</td><td><span class="badge {{ 'on' if j.is_active else 'off' }}">{{ 'Active' if j.is_active else 'Inactive' }}</span></td>
+    <td><a href="{{ url_for('admin_applications', job=j.id) }}">{{ j.applicants }} applicant(s)</a></td>
+    <td><div class="row-actions">
+      <button class="btn btn-outline btn-sm" type="button" data-modal="jobModal" data-title="Edit job" data-action="{{ url_for('admin_job_save', jid=j.id) }}" data-item='{{ j|tojson }}'>Edit</button>
+      <form method="post" action="{{ url_for('admin_job_toggle', jid=j.id) }}">{{ csrf_input }}<button class="btn btn-outline btn-sm" type="submit">{{ 'Deactivate' if j.is_active else 'Activate' }}</button></form>
+      <form method="post" action="{{ url_for('admin_job_delete', jid=j.id) }}" data-confirm="Delete this job and all its applications?">{{ csrf_input }}<button class="btn btn-danger btn-sm" type="submit">Delete</button></form>
+    </div></td></tr>{% endfor %}</tbody>
+</table></div>
+{% else %}<div class="empty">No jobs yet.</div>{% endif %}
+{% endblock %}
+{% block modals %}
+<div class="modal" id="jobModal" role="dialog" aria-modal="true"><div class="modal-box" style="width:min(760px,100%)">
+  <div class="modal-head"><h3 data-modal-title>Create job</h3><button class="icon-btn" type="button" data-close aria-label="Close">&times;</button></div>
+  <form method="post">{{ csrf_input }}
+    <div class="form-grid">
+      <div><label>Company</label><select name="company_id" required>{% for c in companies %}<option value="{{ c.id }}">{{ c.company_name }}</option>{% endfor %}</select></div>
+      <div><label>Job role</label><input name="job_role" required placeholder="Software Developer"></div>
+      <div><label>Salary package (LPA)</label><input name="salary" type="number" step="0.1" min="0" required></div>
+      <div><label>Job type</label><select name="job_type">{% for t in JOB_TYPES %}<option>{{ t }}</option>{% endfor %}</select></div>
+      <div><label>Minimum CGPA</label><input name="minimum_cgpa" type="number" step="0.1" min="0" max="10" required></div>
+      <div><label>Maximum backlogs</label><input name="maximum_backlogs" type="number" min="0" value="0"></div>
+      <div><label>Required departments</label><input name="required_department" placeholder="CSE, IT or All"><div class="hint">Comma separated. Leave empty for all.</div></div>
+      <div><label>Graduation year</label><input name="graduation_year" type="number" min="0" placeholder="0 = any batch"></div>
+      <div class="full"><label>Required skills</label><input name="required_skills" placeholder="Java, Python, SQL"><div class="hint">Comma separated. Students need all of them.</div></div>
+      <div><label>Minimum 10th and 12th %</label><input name="min_percentage" type="number" step="0.1" min="0" max="100" placeholder="0 = no limit"></div>
+      <div><label>Application deadline</label><input name="deadline" type="date" required></div>
+      <div class="full"><label>Job description</label><textarea name="description"></textarea></div>
+    </div>
+    <div class="form-actions"><button class="btn" type="submit">Save job</button><button class="btn btn-outline" type="button" data-close>Cancel</button></div>
+  </form>
+</div></div>
+{% endblock %}

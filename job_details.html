@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+{% block page_title %}{{ job.job_role }}{% endblock %}
+{% block content %}
+<div class="two-col">
+  <section class="card">
+    <div class="job-head" style="margin-bottom:1rem">
+      {% if job.logo %}<img class="co-logo" src="{{ url_for('static', filename='uploads/logos/' ~ job.logo) }}" alt="">
+      {% else %}<span class="co-logo" aria-hidden="true">{{ job.company_name|initials }}</span>{% endif %}
+      <div><h2 style="margin:0">{{ job.job_role }}</h2><span class="muted">{{ job.company_name }}{% if job.website %} &middot; <a href="{{ job.website }}" target="_blank" rel="noopener">Website</a>{% endif %}</span></div>
+    </div>
+    <dl class="detail-list">
+      <dt>Location</dt><dd>{{ job.location or 'Not specified' }}</dd>
+      <dt>Package</dt><dd>{{ job.salary|lpa }}</dd>
+      <dt>Job type</dt><dd>{{ job.job_type }}</dd>
+      <dt>Last date to apply</dt><dd>{{ job.deadline|dmy }}</dd>
+      <dt>Minimum CGPA</dt><dd>{{ '%g'|format(job.minimum_cgpa) }}</dd>
+      <dt>Maximum backlogs</dt><dd>{{ job.maximum_backlogs }}</dd>
+      <dt>Departments</dt><dd>{{ job.required_department }}</dd>
+      <dt>Graduation year</dt><dd>{{ job.graduation_year or 'Any batch' }}</dd>
+      <dt>Min 10th and 12th %</dt><dd>{{ ('%g'|format(job.min_percentage) ~ '%') if job.min_percentage else 'No requirement' }}</dd>
+      <dt>Required skills</dt><dd><div class="tags">{% for s in job.required_skills.split(',') if s.strip() %}<span class="tag">{{ s.strip() }}</span>{% endfor %}</div></dd>
+    </dl>
+    <h3 style="margin-top:1.2rem">Job description</h3>
+    <p>{{ job.description or 'No description provided.' }}</p>
+    {% if job.company_description %}<h3>About {{ job.company_name }}</h3><p>{{ job.company_description }}</p>{% endif %}
+  </section>
+  <aside>
+    <div class="elig-box {{ 'ok' if job.eligible else 'no' }}">
+      {% if job.eligible %}<strong>Congratulations! You are eligible to apply for this position.</strong>
+      {% else %}<strong>You do not meet the eligibility criteria.</strong><ul>{% for r in job.reasons %}<li>{{ r }}</li>{% endfor %}</ul>{% endif %}
+    </div>
+    <div class="form-actions">
+      {% if job.applied %}<span class="badge st-selected">You have applied</span> <a class="btn btn-outline btn-sm" href="{{ url_for('applications') }}">Track status</a>
+      {% elif job.eligible %}<button class="btn" type="button" data-modal="applyModal" data-action="{{ url_for('apply', job_id=job.id) }}"
+           data-item='{{ {"company": job.company_name, "role": job.job_role}|tojson }}'>Apply Now</button>
+      {% else %}<button class="btn" type="button" disabled>Apply Now</button>{% endif %}
+      <a class="btn btn-outline" href="{{ url_for('jobs') }}">Back to jobs</a>
+    </div>
+  </aside>
+</div>
+{% endblock %}
+{% block modals %}{% set st = st %}{% include "_apply_modal.html" %}{% endblock %}

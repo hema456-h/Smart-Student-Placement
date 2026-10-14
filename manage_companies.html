@@ -1,0 +1,38 @@
+{% extends "layout.html" %}
+{% block page_title %}Manage Companies{% endblock %}
+{% block content %}
+<div class="form-actions" style="margin:0 0 1rem"><button class="btn" type="button" data-modal="companyModal" data-action="{{ url_for('admin_company_save') }}" data-title="Add company">Add Company</button>
+  <a class="btn btn-outline" href="{{ url_for('admin_jobs') }}">Manage jobs</a></div>
+{% if companies %}
+<div class="table-wrap"><table>
+  <thead><tr><th>Company</th><th>Location</th><th>Website</th><th>Jobs</th><th>Actions</th></tr></thead>
+  <tbody>{% for c in companies %}
+  <tr><td><div class="job-head">{% if c.logo %}<img class="co-logo" src="{{ url_for('static', filename='uploads/logos/' ~ c.logo) }}" alt="">{% else %}<span class="co-logo" aria-hidden="true">{{ c.company_name|initials }}</span>{% endif %}<strong>{{ c.company_name }}</strong></div></td>
+    <td>{{ c.location or '-' }}</td><td>{% if c.website %}<a href="{{ c.website }}" target="_blank" rel="noopener">{{ c.website }}</a>{% else %}-{% endif %}</td><td>{{ c.job_count }}</td>
+    <td><div class="row-actions">
+      <button class="btn btn-outline btn-sm" type="button" data-modal="viewCompany" data-item='{{ c|tojson }}'>View</button>
+      <button class="btn btn-outline btn-sm" type="button" data-modal="companyModal" data-title="Edit company" data-action="{{ url_for('admin_company_save', cid=c.id) }}" data-item='{{ c|tojson }}'>Edit</button>
+      <form method="post" action="{{ url_for('admin_company_delete', cid=c.id) }}" data-confirm="Delete {{ c.company_name|e }} and all of its jobs and applications?">{{ csrf_input }}<button class="btn btn-danger btn-sm" type="submit">Delete</button></form>
+    </div></td></tr>{% endfor %}</tbody>
+</table></div>
+{% else %}<div class="empty">No companies yet. Add the first one.</div>{% endif %}
+{% endblock %}
+{% block modals %}
+<div class="modal" id="companyModal" role="dialog" aria-modal="true"><div class="modal-box">
+  <div class="modal-head"><h3 data-modal-title>Add company</h3><button class="icon-btn" type="button" data-close aria-label="Close">&times;</button></div>
+  <form method="post" enctype="multipart/form-data">{{ csrf_input }}
+    <div class="form-grid">
+      <div class="full"><label>Company name</label><input name="company_name" required></div>
+      <div><label>Location</label><input name="location" placeholder="Chennai"></div><div><label>Website</label><input name="website" placeholder="https://example.com"></div>
+      <div class="full"><label>Company description</label><textarea name="description"></textarea></div>
+      <div class="full"><label>Logo (PNG, JPG or WEBP)</label><input name="logo" type="file" accept="image/png,image/jpeg,image/webp"><div class="hint">Leave empty to keep the current logo.</div></div>
+    </div>
+    <div class="form-actions"><button class="btn" type="submit">Save company</button><button class="btn btn-outline" type="button" data-close>Cancel</button></div>
+  </form>
+</div></div>
+<div class="modal" id="viewCompany" role="dialog" aria-modal="true"><div class="modal-box">
+  <div class="modal-head"><h3 data-field="company_name"></h3><button class="icon-btn" type="button" data-close aria-label="Close">&times;</button></div>
+  <dl class="detail-list"><dt>Location</dt><dd data-field="location"></dd><dt>Website</dt><dd data-field="website"></dd><dt>Description</dt><dd data-field="description"></dd><dt>Job roles</dt><dd data-field="roles"></dd></dl>
+  <div class="form-actions"><button class="btn" type="button" data-close>Close</button></div>
+</div></div>
+{% endblock %}

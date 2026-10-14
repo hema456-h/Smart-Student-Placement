@@ -1,0 +1,52 @@
+{% extends "layout.html" %}
+{% block page_title %}Find Jobs{% endblock %}
+{% block content %}
+<div class="card filters">
+  <div class="wide"><label for="fSearch">Search company or role</label><input id="fSearch" data-filter type="search" placeholder="e.g. ABC or Developer"></div>
+  <div><label for="fLocation">Location</label><select id="fLocation" data-filter><option value="">All</option>{% for l in locations %}<option>{{ l }}</option>{% endfor %}</select></div>
+  <div><label for="fSalary">Minimum salary</label><select id="fSalary" data-filter><option value="">Any</option><option value="3">3 LPA+</option><option value="5">5 LPA+</option><option value="8">8 LPA+</option><option value="12">12 LPA+</option></select></div>
+  <div><label for="fDept">Department</label><select id="fDept" data-filter><option value="">All</option>{% for d in DEPARTMENTS %}<option>{{ d }}</option>{% endfor %}</select></div>
+  <div><label for="fCgpa">Minimum CGPA up to</label><select id="fCgpa" data-filter><option value="">Any</option>{% for c in (6, 6.5, 7, 7.5, 8, 8.5, 9) %}<option value="{{ c }}">{{ c }}</option>{% endfor %}</select></div>
+  <div><label for="fType">Job type</label><select id="fType" data-filter><option value="">All</option>{% for t in JOB_TYPES %}<option>{{ t }}</option>{% endfor %}</select></div>
+  <div><label style="display:flex;gap:.4rem;align-items:center;font-weight:600"><input id="fEligible" data-filter type="checkbox" style="width:auto"> Only jobs I qualify for</label>
+    <button class="btn btn-outline btn-sm" id="resetFilters" type="button" style="margin-top:.4rem">Reset filters</button></div>
+</div>
+<p class="muted"><strong id="jobCount">{{ jobs|length }}</strong> job(s) shown</p>
+
+<div class="job-grid">
+{% for j in jobs %}
+  <article class="job-card" data-company="{{ j.company_name|lower }}" data-role="{{ j.job_role|lower }}" data-location="{{ j.location }}"
+           data-salary="{{ j.salary }}" data-dept="{{ j.required_department|lower }}" data-cgpa="{{ j.minimum_cgpa }}" data-type="{{ j.job_type }}"
+           data-eligible="{{ 1 if j.eligible or j.applied else 0 }}">
+    <div class="job-head">
+      {% if j.logo %}<img class="co-logo" src="{{ url_for('static', filename='uploads/logos/' ~ j.logo) }}" alt="{{ j.company_name }} logo">
+      {% else %}<span class="co-logo" aria-hidden="true">{{ j.company_name|initials }}</span>{% endif %}
+      <div><h3>{{ j.job_role }}</h3><span class="muted">{{ j.company_name }}</span></div>
+    </div>
+    <div class="job-meta">
+      <span>Location <b>{{ j.location or 'Not specified' }}</b></span><span>Package <b>{{ j.salary|lpa }}</b></span>
+      <span>Job type <b>{{ j.job_type }}</b></span><span>Min CGPA <b>{{ '%g'|format(j.minimum_cgpa) }}</b></span>
+      <span>Max backlogs <b>{{ j.maximum_backlogs }}</b></span><span>Last date <b>{{ j.deadline|dmy }}</b></span>
+    </div>
+    <div class="tags">{% for s in j.required_skills.split(',') if s.strip() %}<span class="tag">{{ s.strip() }}</span>{% endfor %}</div>
+    <p class="small muted" style="margin:0">{{ j.description[:110] }}{{ '...' if j.description|length > 110 }}</p>
+    <div class="job-actions">
+      <a class="btn btn-outline btn-sm" href="{{ url_for('job_details', job_id=j.id) }}">View Details</a>
+      <button class="btn btn-outline btn-sm" type="button" data-check-job="{{ j.id }}">Check Eligibility</button>
+      {% if j.applied %}<span class="badge st-selected">Applied</span>
+      {% elif j.eligible %}<button class="btn btn-sm" type="button" data-modal="applyModal" data-action="{{ url_for('apply', job_id=j.id) }}"
+           data-item='{{ {"company": j.company_name, "role": j.job_role}|tojson }}'>Apply Now</button>
+      {% else %}<button class="btn btn-sm" type="button" disabled title="{{ j.reasons|join('; ') }}">Apply Now</button>{% endif %}
+    </div>
+  </article>
+{% endfor %}
+</div>
+<div class="empty" id="noJobs" {{ 'hidden' if jobs }}>No jobs match your filters.</div>
+{% endblock %}
+{% block modals %}
+{% include "_apply_modal.html" %}
+<div class="modal" id="eligModal" role="dialog" aria-modal="true" aria-labelledby="eligTitle">
+  <div class="modal-box"><div class="modal-head"><h3 id="eligTitle">Eligibility result</h3><button class="icon-btn" type="button" data-close aria-label="Close">&times;</button></div>
+    <div id="eligBody"></div></div>
+</div>
+{% endblock %}

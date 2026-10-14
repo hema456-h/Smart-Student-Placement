@@ -1,0 +1,52 @@
+{% extends "layout.html" %}
+{% block page_title %}My Profile{% endblock %}
+{% block content %}
+<div class="card" style="margin-bottom:1.2rem">
+  <div class="panel-title"><strong>Profile completion</strong><span>{{ completion }}%</span></div>
+  <div class="progress"><span style="width:{{ completion }}%"></span></div>
+</div>
+<form method="post" enctype="multipart/form-data" novalidate>
+  {{ csrf_input }}
+  <fieldset><legend>Personal information</legend>
+    <div class="form-grid">
+      <div><label for="name">Name</label><input id="name" name="name" value="{{ st.name }}" required minlength="3"></div>
+      <div><label>Register number</label><input value="{{ st.register_number }}" readonly></div>
+      <div><label>Email</label><input value="{{ st.email }}" readonly></div>
+      <div><label for="phone">Phone</label><input id="phone" name="phone" value="{{ st.phone or '' }}" pattern="[0-9]{10}" maxlength="10" required></div>
+      <div class="full"><label for="address">Address</label><textarea id="address" name="address" maxlength="250">{{ st.address or '' }}</textarea></div>
+    </div>
+  </fieldset>
+  <fieldset><legend>Academic information</legend>
+    <div class="form-grid">
+      <div><label for="department">Department</label><select id="department" name="department" required>{% for d in DEPARTMENTS %}<option {{ 'selected' if st.department == d }}>{{ d }}</option>{% endfor %}</select></div>
+      <div><label for="year">Graduation year</label><select id="year" name="year" required>{% for y in years %}<option value="{{ y }}" {{ 'selected' if st.year == y }}>{{ y }}</option>{% endfor %}</select></div>
+      <div><label for="cgpa">CGPA</label><input id="cgpa" name="cgpa" type="number" step="0.01" min="0" max="10" value="{{ st.cgpa }}" required></div>
+      <div><label for="backlogs">Current backlogs</label><input id="backlogs" name="backlogs" type="number" min="0" max="50" value="{{ st.backlogs or 0 }}"></div>
+      <div><label for="tenth_percentage">10th percentage</label><input id="tenth_percentage" name="tenth_percentage" type="number" step="0.01" min="0" max="100" value="{{ st.tenth_percentage if st.tenth_percentage is not none }}"></div>
+      <div><label for="twelfth_percentage">12th percentage</label><input id="twelfth_percentage" name="twelfth_percentage" type="number" step="0.01" min="0" max="100" value="{{ st.twelfth_percentage if st.twelfth_percentage is not none }}"></div>
+    </div>
+  </fieldset>
+  <fieldset><legend>Skills</legend>
+    <p class="hint" style="margin-top:0">Separate skills with commas. Eligibility matches these against each job's required skills.</p>
+    <div class="form-grid">
+      <div><label for="prog_skills">Programming languages</label><input id="prog_skills" name="prog_skills" value="{{ st.prog_skills }}" placeholder="Python, Java, C"></div>
+      <div><label for="web_skills">Web technologies</label><input id="web_skills" name="web_skills" value="{{ st.web_skills }}" placeholder="HTML, CSS, JavaScript"></div>
+      <div><label for="db_skills">Database skills</label><input id="db_skills" name="db_skills" value="{{ st.db_skills }}" placeholder="SQL, MySQL"></div>
+      <div><label for="other_skills">Other technical skills</label><input id="other_skills" name="other_skills" value="{{ st.other_skills }}" placeholder="Git, Excel"></div>
+      <div class="full"><label for="soft_skills">Soft skills</label><input id="soft_skills" name="soft_skills" value="{{ st.soft_skills }}" placeholder="Communication, Teamwork"></div>
+    </div>
+  </fieldset>
+  <fieldset><legend>Resume</legend>
+    <label for="resume">Upload PDF resume (max 5 MB)</label>
+    <input id="resume" name="resume" type="file" accept="application/pdf,.pdf">
+    {% if st.resume %}
+    <p class="small" style="margin-bottom:0">Current resume on file:
+      <a href="{{ url_for('resume', student_id=st.id) }}" target="_blank" rel="noopener">View</a> &middot;
+      <a href="{{ url_for('resume', student_id=st.id, download=1) }}">Download</a></p>
+    {% else %}<p class="hint">No resume uploaded yet. You need one before you can apply.</p>{% endif %}
+  </fieldset>
+  <div class="form-actions"><button class="btn" type="submit">Update Profile</button>
+    {% if st.resume %}<a class="btn btn-outline" href="{{ url_for('resume', student_id=st.id) }}" target="_blank" rel="noopener">View Resume</a>
+    <a class="btn btn-outline" href="{{ url_for('resume', student_id=st.id, download=1) }}">Download Resume</a>{% endif %}</div>
+</form>
+{% endblock %}

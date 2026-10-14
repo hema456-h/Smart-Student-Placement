@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+{% block page_title %}My Applications{% endblock %}
+{% block content %}
+{% if apps %}
+<div class="table-wrap"><table>
+  <thead><tr><th>Company</th><th>Job role</th><th>Package</th><th>Applied date</th><th>Status</th></tr></thead>
+  <tbody>{% for a in apps %}
+    <tr><td>{{ a.company_name }}</td><td>{{ a.job_role }}</td><td>{{ a.salary|lpa }}</td><td>{{ a.applied_date|dmy }}</td>
+        <td><span class="badge {{ a.status|stclass }}">{{ a.status }}</span></td></tr>{% endfor %}
+  </tbody>
+</table></div>
+<p class="hint">Statuses move through Applied, Under Review, Shortlisted, Interview Scheduled, then Selected or Rejected. You are notified at each change.</p>
+{% else %}
+<div class="empty">You have not applied anywhere yet. <a href="{{ url_for('jobs') }}">Browse open jobs</a>.</div>
+{% endif %}
+{% endblock %}

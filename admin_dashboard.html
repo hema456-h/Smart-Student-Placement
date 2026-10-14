@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+{% block page_title %}Placement Overview{% endblock %}
+{% block content %}
+<div class="stat-grid">
+  <div class="stat"><div class="num">{{ stats.students }}</div><div class="lbl">Total students</div></div>
+  <div class="stat"><div class="num">{{ stats.companies }}</div><div class="lbl">Total companies</div></div>
+  <div class="stat"><div class="num">{{ stats.jobs }}</div><div class="lbl">Total jobs</div></div>
+  <div class="stat"><div class="num">{{ stats.applications }}</div><div class="lbl">Total applications</div></div>
+  <div class="stat purple"><div class="num">{{ stats.shortlisted }}</div><div class="lbl">Shortlisted students</div></div>
+  <div class="stat green"><div class="num">{{ stats.selected }}</div><div class="lbl">Selected students</div></div>
+  <div class="stat amber"><div class="num">{{ stats.pending }}</div><div class="lbl">Pending applications</div></div>
+</div>
+<div class="chart-grid">
+  <div class="card"><h2 style="font-size:1.1rem">Students by department</h2><div class="chart-box"><canvas id="deptChart"></canvas></div></div>
+  <div class="card"><h2 style="font-size:1.1rem">Applications by company</h2><div class="chart-box"><canvas id="companyChart"></canvas></div></div>
+  <div class="card"><h2 style="font-size:1.1rem">Selected vs rejected</h2><div class="chart-box"><canvas id="outcomeChart"></canvas></div></div>
+  <div class="card"><h2 style="font-size:1.1rem">Monthly placement statistics</h2><div class="chart-box"><canvas id="monthlyChart"></canvas></div></div>
+</div>
+<div class="panel-title"><h2>Latest applications</h2><a class="small" href="{{ url_for('admin_applications') }}">Manage all</a></div>
+{% if recent %}<div class="table-wrap"><table>
+  <thead><tr><th>Student</th><th>Company</th><th>Role</th><th>Applied</th><th>Status</th></tr></thead>
+  <tbody>{% for a in recent %}<tr><td>{{ a.name }}</td><td>{{ a.company_name }}</td><td>{{ a.job_role }}</td><td>{{ a.applied_date|dmy }}</td><td><span class="badge {{ a.status|stclass }}">{{ a.status }}</span></td></tr>{% endfor %}</tbody>
+</table></div>{% else %}<div class="empty">No applications yet.</div>{% endif %}
+{% endblock %}
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+const C = {{ charts|tojson }};
+const navy = "#0a2342", blue = "#2563c9", sky = "#9dc0f2", green = "#1d7a50", red = "#c0392b";
+const palette = [navy, blue, sky, "#5b8fd9", "#123a6b", "#7aa7e8", "#3d6fb5"];
+const grid = { y: { beginAtZero: true, ticks: { precision: 0 } } };
+if (window.Chart) {
+  new Chart(deptChart, { type: "bar", data: { labels: C.dept.labels, datasets: [{ label: "Students", data: C.dept.data, backgroundColor: blue }] },
+    options: { maintainAspectRatio: false, scales: grid, plugins: { legend: { display: false } } } });
+  new Chart(companyChart, { type: "bar", data: { labels: C.company.labels, datasets: [{ label: "Applications", data: C.company.data, backgroundColor: navy }] },
+    options: { maintainAspectRatio: false, indexAxis: "y", scales: { x: { beginAtZero: true, ticks: { precision: 0 } } }, plugins: { legend: { display: false } } } });
+  new Chart(outcomeChart, { type: "doughnut", data: { labels: ["Selected", "Rejected"], datasets: [{ data: [C.outcome.selected, C.outcome.rejected], backgroundColor: [green, red] }] },
+    options: { maintainAspectRatio: false } });
+  new Chart(monthlyChart, { type: "line", data: { labels: C.monthly.labels, datasets: [
+      { label: "Applications", data: C.monthly.applied, borderColor: blue, backgroundColor: blue, tension: .3 },
+      { label: "Selected", data: C.monthly.selected, borderColor: green, backgroundColor: green, tension: .3 }] },
+    options: { maintainAspectRatio: false, scales: grid } });
+} else { document.querySelectorAll(".chart-box").forEach(b => b.textContent = "Charts need an internet connection to load Chart.js."); }
+</script>
+{% endblock %}

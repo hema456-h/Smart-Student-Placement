@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+{% block page_title %}Manage Notifications{% endblock %}
+{% block content %}
+<div class="two-col">
+  <section class="card">
+    <h2 style="font-size:1.2rem">Send an announcement</h2>
+    <form method="post" action="{{ url_for('admin_notification_send') }}">{{ csrf_input }}
+      <div class="form-grid">
+        <div class="full"><label for="title">Title</label><input id="title" name="title" required maxlength="120" placeholder="Campus drive on Friday"></div>
+        <div class="full"><label for="message">Message</label><textarea id="message" name="message" required maxlength="500"></textarea></div>
+        <div class="full"><label for="department">Send to</label><select id="department" name="department"><option value="">All students</option>{% for d in DEPARTMENTS %}<option>{{ d }}</option>{% endfor %}</select></div>
+      </div>
+      <div class="form-actions"><button class="btn" type="submit">Send announcement</button></div>
+    </form>
+  </section>
+  <section>
+    <h2 style="font-size:1.2rem">Recent notifications</h2>
+    {% for n in notes %}
+    <div class="note"><div style="display:flex;justify-content:space-between;gap:.5rem"><h3>{{ n.title }}</h3>
+      <form method="post" action="{{ url_for('admin_notification_delete', nid=n.id) }}" data-confirm="Delete this notification?">{{ csrf_input }}<button class="btn btn-outline btn-sm" type="submit">Delete</button></form></div>
+      <p class="small">{{ n.message }}</p><span class="small muted">To {{ n.name }} &middot; {{ n.created_at[:16] }}</span></div>
+    {% else %}<div class="empty">No notifications have been sent.</div>{% endfor %}
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,9 @@
+{% extends "layout.html" %}
+{% block page_title %}Notifications{% endblock %}
+{% block content %}
+{% for n in notes %}
+<div class="note {{ 'unread' if not n.is_read }}">
+  <h3>{{ n.title }}</h3><p>{{ n.message }}</p><span class="small muted">{{ n.created_at[:16] }}</span>
+</div>
+{% else %}<div class="empty">No notifications yet. Job postings and application updates will show up here.</div>{% endfor %}
+{% endblock %}

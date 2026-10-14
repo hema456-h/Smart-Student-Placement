@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+{% block page_title %}Manage Applications{% endblock %}
+{% block content %}
+<form class="card filters" method="get">
+  <div><label for="company">Company</label><select id="company" name="company"><option value="">All</option>{% for c in companies %}<option value="{{ c.id }}" {{ 'selected' if flt.company == c.id|string }}>{{ c.company_name }}</option>{% endfor %}</select></div>
+  <div><label for="role">Job role</label><select id="role" name="role"><option value="">All</option>{% for r in roles %}<option {{ 'selected' if flt.role == r }}>{{ r }}</option>{% endfor %}</select></div>
+  <div><label for="dept">Department</label><select id="dept" name="dept"><option value="">All</option>{% for d in DEPARTMENTS %}<option {{ 'selected' if flt.dept == d }}>{{ d }}</option>{% endfor %}</select></div>
+  <div><label for="status">Status</label><select id="status" name="status"><option value="">All</option>{% for s in STATUSES %}<option {{ 'selected' if flt.status == s }}>{{ s }}</option>{% endfor %}</select></div>
+  {% if flt.job %}<input type="hidden" name="job" value="{{ flt.job }}">{% endif %}
+  <div style="display:flex;gap:.5rem"><button class="btn" type="submit">Filter</button><a class="btn btn-outline" href="{{ url_for('admin_applications') }}">Clear</a></div>
+</form>
+{% if apps %}
+<div class="table-wrap"><table>
+  <thead><tr><th>Student</th><th>Dept</th><th>Company and role</th><th>Applied</th><th>Status</th><th>Update status</th></tr></thead>
+  <tbody>{% for a in apps %}
+  <tr><td>{{ a.name }}<div class="small muted">{{ a.register_number }} &middot; CGPA {{ '%.2f'|format(a.cgpa or 0) }}</div>
+        {% if a.resume %}<a class="small" href="{{ url_for('resume', student_id=a.student_id) }}" target="_blank" rel="noopener">View resume</a>{% endif %}</td>
+    <td>{{ a.department }}</td><td>{{ a.company_name }}<div class="small muted">{{ a.job_role }}</div></td><td>{{ a.applied_date|dmy }}</td>
+    <td><span class="badge {{ a.status|stclass }}">{{ a.status }}</span></td>
+    <td><form class="status-form" method="post" action="{{ url_for('admin_application_status', aid=a.id) }}">{{ csrf_input }}
+        <input type="hidden" name="next" value="{{ request.full_path }}">
+        <select name="status" aria-label="New status">{% for s in STATUSES %}<option {{ 'selected' if a.status == s }}>{{ s }}</option>{% endfor %}</select>
+        <input name="note" placeholder="Optional note (e.g. interview time)" maxlength="300" aria-label="Note to student">
+        <button class="btn btn-sm" type="submit">Update</button></form></td></tr>{% endfor %}</tbody>
+</table></div>
+{% else %}<div class="empty">No applications match these filters.</div>{% endif %}
+{% endblock %}
